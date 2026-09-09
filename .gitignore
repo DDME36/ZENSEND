@@ -57,3 +57,19 @@ next-env.d.ts
 # OS
 .DS_Store
 Thumbs.db
+
+# Bun lock (use npm on Vercel)
+bun.lock
+bun.lockb
+
+# Dev logs
+dev-server.log
+dev-server-error.log
+*.log
+
+# Screenshot artifacts
+*.png
+!public/*.png
+
+# Backups
+backups/
