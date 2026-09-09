@@ -1,0 +1,79 @@
+<style>
+  #zen-avatar-directions .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  #zen-avatar-directions .card-image { min-height: 250px; display: grid; place-items: center; background: var(--background); }
+  #zen-avatar-directions .identity-demo { width: min(100%, 210px); display: grid; place-items: center; gap: 20px; }
+  #zen-avatar-directions .avatar { position: relative; display: grid; place-items: center; width: 92px; height: 92px; font-size: 40px; }
+  #zen-avatar-directions .avatar-a { border-radius: 50%; background: color-mix(in srgb, var(--green) 12%, var(--card)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--green) 45%, transparent), 0 12px 34px color-mix(in srgb, var(--green) 22%, transparent); }
+  #zen-avatar-directions .avatar-a::before { content: ''; position: absolute; inset: -8px; border: 1px solid color-mix(in srgb, var(--green) 54%, transparent); border-radius: 50%; opacity: .58; }
+  #zen-avatar-directions .avatar-a::after { content: ''; position: absolute; right: 4px; bottom: 7px; width: 12px; height: 12px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px var(--card); }
+  #zen-avatar-directions .avatar-b { border-radius: 26px; background: linear-gradient(145deg, color-mix(in srgb, var(--blue) 25%, var(--card)), color-mix(in srgb, var(--purple) 22%, var(--card))); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--foreground) 16%, transparent), 0 14px 30px color-mix(in srgb, var(--blue) 18%, transparent); transform: rotate(-3deg); }
+  #zen-avatar-directions .avatar-b::after { content: 'PUBLIC'; position: absolute; bottom: -24px; padding: 3px 8px; color: var(--muted-foreground); font-size: 10px; letter-spacing: .08em; transform: rotate(3deg); }
+  #zen-avatar-directions .avatar-c { border-radius: 50%; background: color-mix(in srgb, var(--purple) 12%, var(--card)); box-shadow: inset 0 0 18px color-mix(in srgb, var(--purple) 25%, transparent); }
+  #zen-avatar-directions .avatar-c::before { content: ''; position: absolute; inset: -15px; border: 1px dashed color-mix(in srgb, var(--purple) 58%, transparent); border-radius: 50%; transform: rotate(20deg); }
+  #zen-avatar-directions .avatar-c::after { content: ''; position: absolute; top: -10px; right: 1px; width: 9px; height: 9px; border-radius: 50%; background: var(--purple); box-shadow: 0 0 12px var(--purple); }
+  #zen-avatar-directions .identity-row { width: 100%; display: flex; align-items: center; gap: 12px; color: var(--foreground); }
+  #zen-avatar-directions .identity-row strong { display: block; font-weight: 500; }
+  #zen-avatar-directions .identity-row span { display: block; color: var(--muted-foreground); font-size: 12px; }
+  #zen-avatar-directions .mini-avatar { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 42px; border-radius: 50%; background: color-mix(in srgb, var(--green) 12%, var(--card)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--green) 42%, transparent); }
+  #zen-avatar-directions .instant-note { display: flex; align-items: center; gap: 8px; color: var(--muted-foreground); }
+  #zen-avatar-directions .instant-note i { color: var(--green); }
+  @media (max-width: 720px) { #zen-avatar-directions .cards { grid-template-columns: 1fr; } }
+</style>
+
+<div id="zen-avatar-directions">
+  <h2>เลือกบุคลิกของ Avatar</h2>
+  <p class="subtitle">ทั้งสามแบบจะใช้ “แตะแล้วเปลี่ยนทันที” พร้อม Undo — ไม่มีปุ่มเรียบร้อยซ้ำซ้อน</p>
+
+  <div class="cards">
+    <button class="card" type="button" data-choice="aura-glass" onclick="toggleSelect(this)">
+      <div class="card-image">
+        <div class="identity-demo">
+          <div class="avatar avatar-a" aria-hidden="true">⚡</div>
+          <div class="identity-row">
+            <span class="mini-avatar">⚡</span>
+            <span><strong>Drift Matrix</strong><span>ออนไลน์ · สาธารณะ</span></span>
+          </div>
+          <span class="instant-note"><i data-lucide="circle-check" aria-hidden="true"></i> เปลี่ยนแล้ว · เลิกทำ</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>A — Aura Glass</h3>
+        <p>สงบ โปร่ง และดูเป็น ZenSend ที่สุด วงแสงเปลี่ยนสีตามโหมดโดยไม่แย่ง emoji</p>
+      </div>
+    </button>
+
+    <button class="card" type="button" data-choice="identity-chip" onclick="toggleSelect(this)">
+      <div class="card-image">
+        <div class="identity-demo">
+          <div class="avatar avatar-b" aria-hidden="true">⚡</div>
+          <div class="identity-row">
+            <span class="mini-avatar">⚡</span>
+            <span><strong>Drift Matrix</strong><span>Identity chip</span></span>
+          </div>
+          <span class="instant-note"><i data-lucide="circle-check" aria-hidden="true"></i> เปลี่ยนแล้ว · เลิกทำ</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>B — Identity Chip</h3>
+        <p>เป็น tech product ชัด แต่รูปทรงเหลี่ยมจะต่างจากวงกลมที่ใช้ใน peer cards เดิม</p>
+      </div>
+    </button>
+
+    <button class="card" type="button" data-choice="orbital-halo" onclick="toggleSelect(this)">
+      <div class="card-image">
+        <div class="identity-demo">
+          <div class="avatar avatar-c" aria-hidden="true">⚡</div>
+          <div class="identity-row">
+            <span class="mini-avatar">⚡</span>
+            <span><strong>Drift Matrix</strong><span>Zen orbit identity</span></span>
+          </div>
+          <span class="instant-note"><i data-lucide="circle-check" aria-hidden="true"></i> เปลี่ยนแล้ว · เลิกทำ</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3>C — Orbital Halo</h3>
+        <p>โดดเด่นและล้ำกว่า แต่เส้นโคจรเพิ่ม motion และอาจชนกับภาษา radar ของหน้าหลัก</p>
+      </div>
+    </button>
+  </div>
+</div>

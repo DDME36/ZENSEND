@@ -1,0 +1,50 @@
+{
+  "name": "ZenSend — Direct P2P File Transfer",
+  "short_name": "ZenSend",
+  "description": "ส่งไฟล์ข้ามอุปกรณ์ทันที ปลอดภัยด้วย P2P Direct Stream • Zend by Zentyr",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#090d16",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png?v=z-horse-1",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png?v=z-horse-1",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.png?v=z-horse-1",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": [
+    "utilities",
+    "productivity"
+  ],
+  "lang": "th",
+  "share_target": {
+    "action": "/",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [
+        {
+          "name": "file",
+          "accept": [
+            "*/*"
+          ]
+        }
+      ]
+    }
+  }
+}

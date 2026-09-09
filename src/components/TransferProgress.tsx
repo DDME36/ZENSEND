@@ -1,0 +1,430 @@
+'use client';
+
+import { useEffect, useState, useRef } from 'react';
+import { getConnectionRouteInfo, type ConnectionType } from '@/lib/webrtc';
+
+interface TransferProgressProps {
+  fileName: string;
+  fileSize: number;
+  progress: number;
+  status: 'pending' | 'preparing' | 'connecting' | 'sending' | 'confirming' | 'receiving' | 'saving' | 'complete' | 'error';
+  emoji: string;
+  peerName: string;
+  connectionType?: ConnectionType;
+  rtt?: number;
+  onComplete?: () => void;
+  onCancel?: () => void;
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+function formatTime(seconds: number): string {
+  if (!isFinite(seconds) || seconds <= 0) return '--:--';
+  if (seconds < 60) return `${Math.ceil(seconds)} วิ`;
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.ceil(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')} นาที`;
+}
+
+export function TransferProgress({ fileName, fileSize, progress, status, emoji, peerName, connectionType, rtt, onComplete, onCancel }: TransferProgressProps) {
+  const [speed, setSpeed] = useState(0);
+  const [eta, setEta] = useState(0);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const lastUpdateRef = useRef({ time: 0, bytes: 0 });
+  const speedHistoryRef = useRef<number[]>([]);
+  const minDisplayTimeRef = useRef<number | null>(null);
+
+  const displayProgressVal = (status === 'saving' || status === 'confirming' || status === 'complete') ? 100 : Math.min(100, Math.max(0, Number.isFinite(progress) ? progress : 0));
+
+  // Handle completion with minimum display time
+  useEffect(() => {
+    if (status === 'complete' && !showSuccess && !isClosing) {
+      // Auto-expand when complete
+      setTimeout(() => {
+        setIsMinimized(false);
+      }, 0);
+
+      const startTime = minDisplayTimeRef.current || Date.now();
+      const elapsed = Date.now() - startTime;
+      const minTime = 4000; // Minimum 4 seconds display for mobile Safari
+      const remaining = Math.max(0, minTime - elapsed);
+
+      // Then show success after minimum time
+      const successTimer = setTimeout(() => {
+        setShowSuccess(true);
+      }, remaining + 500);
+
+      return () => clearTimeout(successTimer);
+    }
+  }, [status, showSuccess, isClosing]);
+
+  // Auto close after showing success
+  useEffect(() => {
+    if (showSuccess && !isClosing) {
+      const closeTimer = setTimeout(() => {
+        setIsClosing(true);
+
+        // Wait for close animation to finish
+        setTimeout(() => {
+          setIsVisible(false);
+          onComplete?.();
+        }, 400);
+      }, 2000);
+
+      return () => clearTimeout(closeTimer);
+    }
+  }, [showSuccess, isClosing, onComplete]);
+
+  // Calculate speed and ETA
+  useEffect(() => {
+    const now = Date.now();
+    const currentBytes = (progress / 100) * fileSize;
+    const timeDiff = (now - lastUpdateRef.current.time) / 1000;
+    const bytesDiff = currentBytes - lastUpdateRef.current.bytes;
+
+    if (timeDiff > 0.1 && bytesDiff > 0) {
+      const currentSpeed = bytesDiff / timeDiff;
+
+      speedHistoryRef.current.push(currentSpeed);
+      if (speedHistoryRef.current.length > 5) {
+        speedHistoryRef.current.shift();
+      }
+      const avgSpeed = speedHistoryRef.current.reduce((a, b) => a + b, 0) / speedHistoryRef.current.length;
+
+      setSpeed(avgSpeed);
+
+      const remaining = fileSize - currentBytes;
+      setEta(remaining / avgSpeed);
+
+      lastUpdateRef.current = { time: now, bytes: currentBytes };
+    }
+  }, [progress, fileSize]);
+
+  // Reset on new transfer
+  useEffect(() => {
+    if (progress === 0) {
+      lastUpdateRef.current = { time: Date.now(), bytes: 0 };
+      speedHistoryRef.current = [];
+      minDisplayTimeRef.current = Date.now();
+      setTimeout(() => {
+        setSpeed(0);
+        setEta(0);
+        setShowSuccess(false);
+        setIsClosing(false);
+        setIsVisible(true);
+        setIsMinimized(false);
+      }, 0);
+    }
+  }, [progress]);
+
+  if (!isVisible) return null;
+
+  const statusConfig = {
+    pending: { text: 'ส่งคำขอแล้ว', icon: 'waiting', color: 'var(--accent-lavender)', detail: `กำลังรอผู้รับกดรับไฟล์` },
+    preparing: { text: 'กำลังเตรียมไฟล์', icon: 'waiting', color: 'var(--accent-lavender)', detail: 'กำลังเตรียมพื้นที่บันทึกก่อนเริ่มส่ง' },
+    connecting: { text: 'กำลังเชื่อมต่อ', icon: 'waiting', color: 'var(--accent-lavender)', detail: 'กำลังสร้างช่องทางส่งไฟล์โดยตรง' },
+    sending: { text: 'กำลังส่งไฟล์', icon: 'upload', color: 'var(--accent-mint)', detail: 'อย่าปิดหน้านี้จนกว่าจะส่งเสร็จ' },
+    confirming: { text: 'ส่งครบแล้ว', icon: 'waiting', color: 'var(--accent-lavender)', detail: 'กำลังรอผู้รับตรวจสอบไฟล์' },
+    receiving: { text: 'กำลังรับไฟล์', icon: 'download', color: 'var(--accent-peach)', detail: 'อย่าปิดหน้าจอระหว่างรับไฟล์' },
+    saving: { text: 'กำลังเตรียมไฟล์', icon: 'save', color: 'var(--accent-lavender)', detail: 'ได้รับข้อมูลครบแล้ว กำลังรวมไฟล์' },
+    complete: { text: 'เสร็จเรียบร้อย', icon: 'check', color: 'var(--accent-mint)', detail: 'ไฟล์พร้อมใช้งานแล้ว' },
+    error: { text: 'ผิดพลาด', icon: 'x', color: '#ff6b6b', detail: 'การเชื่อมต่อล้มเหลว' },
+  };
+
+  const config = statusConfig[status];
+  const isActive = status === 'pending' || status === 'preparing' || status === 'connecting' || status === 'sending' || status === 'confirming' || status === 'receiving' || status === 'saving';
+  const showProgress = status === 'sending' || status === 'receiving' || status === 'confirming' || status === 'saving';
+  const routeInfo = getConnectionRouteInfo(connectionType);
+
+  let iconSvg = null;
+  if (config.icon === 'waiting') {
+    iconSvg = (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={config.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-waiting">
+        <path d="M5 22h14" />
+        <path d="M5 2h14" />
+        <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" />
+        <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" />
+      </svg>
+    );
+  } else if (config.icon === 'upload') {
+    iconSvg = (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={config.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 17V3" />
+        <path d="m6 8 6-6 6 6" />
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      </svg>
+    );
+  } else if (config.icon === 'download') {
+    iconSvg = (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={config.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 15V3" />
+        <path d="m7 10 5 5 5-5" />
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      </svg>
+    );
+  } else if (config.icon === 'save') {
+    iconSvg = (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={config.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-waiting">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+        <polyline points="17 21 17 13 7 13 7 21" />
+        <polyline points="7 3 7 8 15 8" />
+      </svg>
+    );
+  } else if (config.icon === 'check') {
+    iconSvg = (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={config.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 6 9 17l-5-5" />
+      </svg>
+    );
+  } else {
+    iconSvg = (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={config.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 6 6 18" />
+        <path d="m6 6 12 12" />
+      </svg>
+    );
+  }
+
+  // ── Minimized floating bar ──
+  if (isMinimized) {
+    return (
+      <div
+        className={`transfer-minimized-bar ${isClosing ? 'closing' : ''}`}
+        onClick={() => setIsMinimized(false)}
+        role="button"
+        tabIndex={0}
+        aria-label="ขยายรายละเอียดการถ่ายโอน"
+      >
+        <div className={`tmb-emoji emoji-avatar ${status === 'complete' ? 'emoji-success' : isActive ? 'emoji-sending' : 'emoji-idle'}`}>{emoji}</div>
+
+        <div className="tmb-info">
+          <div className="tmb-top-row">
+            <span className="tmb-status" style={{ color: config.color }}>
+              {iconSvg}
+              {config.text}
+            </span>
+            {showProgress && <span className="tmb-percent" style={{ fontVariantNumeric: 'tabular-nums' }}>{displayProgressVal.toFixed(0)}%</span>}
+          </div>
+          <div className="tmb-filename">{fileName}</div>
+          {routeInfo && connectionType && (
+            <div className={`tmb-route-pill ${connectionType}`}>{routeInfo.shortLabel}</div>
+          )}
+          {showProgress && <div className="tmb-progress-track">
+            <div
+              className="tmb-progress-fill"
+              style={{
+                width: `${displayProgressVal}%`,
+                background: `linear-gradient(90deg, ${config.color}, var(--accent-pink))`,
+              }}
+            />
+          </div>}
+          {isActive && speed > 0 && (
+            <div className="tmb-stats" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              <span>{formatBytes(speed)}/s</span>
+              <span>·</span>
+              <span>{formatTime(eta)}</span>
+              {typeof rtt === 'number' && rtt > 0 && (
+                <>
+                  <span>·</span>
+                  <span>{rtt}ms</span>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Expand chevron */}
+        <div className="tmb-expand">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m18 15-6-6-6 6" />
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Expanded full overlay ──
+  return (
+    <div className={`transfer-overlay ${showSuccess ? 'success-state' : ''} ${isClosing ? 'closing' : ''}`}>
+      <div className={`transfer-card ${showSuccess ? 'card-success' : ''} ${isClosing ? 'card-closing' : ''}`}>
+        {/* Animated background */}
+        <div className="transfer-bg">
+        </div>
+
+        {/* Minimize button (only show during active transfer, not during success or error) */}
+        {isActive && (
+          <button
+            className="transfer-minimize-btn"
+            onClick={(e) => { e.stopPropagation(); setIsMinimized(true); }}
+            title="ย่อ"
+            aria-label="ย่อหน้าต่างการถ่ายโอน"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+        )}
+
+        {/* Content */}
+        <div className="transfer-content">
+          {showSuccess ? (
+            // Success State - morphed from progress
+            <>
+              <div className="transfer-success-check">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <div className="transfer-success-text">
+                {status === 'complete' ? 'ส่งสำเร็จ!' : 'เสร็จแล้ว!'}
+              </div>
+              <div className="transfer-success-file">{fileName}</div>
+            </>
+          ) : (
+            // Progress State
+            <>
+              <div className={`transfer-emoji ${isActive ? 'pulse' : ''}`}>
+                <span className={`emoji-avatar ${status === 'complete' ? 'emoji-success' : isActive ? 'emoji-sending' : 'emoji-idle'}`}>{emoji}</span>
+              </div>
+              <div className="transfer-peer-name">{peerName}</div>
+
+              <div className="transfer-status-row" role="status" aria-live="polite" style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="transfer-status-icon">{iconSvg}</span>
+                  <span className="transfer-status-text" style={{ color: config.color }}>{config.text}</span>
+                </div>
+                {config.detail && (
+                  <div className="transfer-status-detail" style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px', textAlign: 'center' }}>
+                    {config.detail}
+                  </div>
+                )}
+              </div>
+
+              {/* E2E Encryption Indicator */}
+              <div className="transfer-badges">
+                <div className="transfer-e2e-badge">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                  <span>E2E</span>
+                </div>
+
+                {/* Connection Type Badge */}
+                {connectionType && (
+                  <div className={`transfer-connection-badge ${connectionType}`}>
+                    {connectionType === 'direct' && (
+                      <>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                        </svg>
+                        <span>{routeInfo?.shortLabel || 'Direct'}</span>
+                      </>
+                    )}
+                    {connectionType === 'stun' && (
+                      <>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="M12 16v-4" />
+                          <path d="M12 8h.01" />
+                        </svg>
+                        <span>{routeInfo?.shortLabel || 'P2P'}</span>
+                      </>
+                    )}
+                    {connectionType === 'relay' && (
+                      <>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3Z" />
+                        </svg>
+                        <span>{routeInfo?.shortLabel || 'Relay'}</span>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {routeInfo && connectionType && (
+                <div className={`transfer-route-note ${connectionType}`} title={routeInfo.serverRole}>
+                  <span>{routeInfo.description}</span>
+                  <span>•</span>
+                  <span>{routeInfo.serverRole}</span>
+                  {typeof rtt === 'number' && rtt > 0 && (
+                    <>
+                      <span>•</span>
+                      <span>{rtt}ms</span>
+                    </>
+                  )}
+                </div>
+              )}
+
+              <div className="transfer-filename" title={fileName}>{fileName}</div>
+
+              {showProgress && (
+                <div className="transfer-progress-container">
+                  <div className="transfer-progress-track" role="progressbar" aria-label={`การส่ง ${fileName}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={displayProgressVal} aria-valuetext={`${config.text} ${Math.round(displayProgressVal)}%`}>
+                    <div
+                      className="transfer-progress-fill"
+                      style={{
+                        width: `${displayProgressVal}%`,
+                        background: `linear-gradient(90deg, ${config.color}, var(--accent-pink))`,
+                      }}
+                    />
+                    <div className="transfer-progress-percent" style={{ fontVariantNumeric: 'tabular-nums' }}>{displayProgressVal.toFixed(1)}%</div>
+                    {isActive && (
+                      <div
+                        className="transfer-progress-glow"
+                        style={{ left: `${displayProgressVal}%` }}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {isActive && fileSize > 0 && (
+                !showProgress ? (
+                  <div className="transfer-stats-clean" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <span className="spinner-mini" style={{ width: '12px', height: '12px', borderRadius: '50%', border: '2px solid var(--border-color)', borderTopColor: config.color, animation: 'spin 1s linear infinite' }} />
+                    <span>{config.text}</span>
+                  </div>
+                ) : (
+                  <div className="transfer-stats-clean" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    <span>{formatBytes((progress / 100) * fileSize)} / {formatBytes(fileSize)}</span>
+                    <span className="dot-separator">•</span>
+                    <span>{formatBytes(speed)}/s</span>
+                    <span className="dot-separator">•</span>
+                    <span>{formatTime(eta)}</span>
+                  </div>
+                )
+              )}
+
+              {isActive && onCancel && status !== 'saving' && status !== 'confirming' && (
+                <button className="transfer-cancel-btn" onClick={onCancel}>
+                  {(status === 'sending' || status === 'receiving') ? 'หยุดการส่ง' : 'ยกเลิก'}
+                </button>
+              )}
+
+              {status === 'error' && (
+                <div className="transfer-error">
+                  <p>การเชื่อมต่อล้มเหลว</p>
+                  <button className="transfer-cancel-btn" onClick={onCancel}>
+                    ปิด
+                  </button>
+                </div>
+              )}
+            </>
+          )
+          }
+        </div >
+      </div >
+    </div >
+  );
+}

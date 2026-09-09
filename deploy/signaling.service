@@ -1,0 +1,18 @@
+[Unit]
+Description=ZenSend Signaling Server by Zentyr
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/zensend
+ExecStart=/usr/bin/node /home/ubuntu/zensend/server.js
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+Environment=PORT=3001
+Environment=ALLOWED_ORIGINS=https://zensend.vercel.app,http://localhost:3000
+Environment=ENABLE_RENDER_KEEPALIVE=false
+
+[Install]
+WantedBy=multi-user.target
