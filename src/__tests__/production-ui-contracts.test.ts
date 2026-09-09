@@ -83,13 +83,13 @@ test('requires confirmation before blocking and provides persistent unblock mana
   const modal = read('src/components/modals/BlockedPeersModal.tsx');
 
   assert.match(page, /setPendingBlock\(\{ peer, rejectOffer: true \}\)/);
-  assert.match(page, /confirmText="บล็อกอุปกรณ์"/);
+  assert.match(page, /confirmText="Block"/);
   assert.match(page, /unblockRemotePeer\(peerId\)/);
-  assert.match(header, /อุปกรณ์ที่บล็อก/);
-  assert.match(modal, /เลิกบล็อก/);
+  assert.match(header, /Blocked/);
+  assert.match(modal, /[Uu]nblock/);
   assert.match(modal, /blockedAt/);
   assert.doesNotMatch(peerCard, /🚫/);
-  assert.doesNotMatch(page, /บล็อก.*อัตโนมัติ/);
+  assert.doesNotMatch(page, /auto.?block|block.*automat/i);
 });
 
 test('keeps radar and notification effects clipped to their rounded geometry', () => {

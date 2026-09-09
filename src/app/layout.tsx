@@ -73,7 +73,7 @@ export default function RootLayout({
       price: '0',
       priceCurrency: 'USD',
     },
-    description: 'ส่งไฟล์ข้ามอุปกรณ์ทันที ไม่ต้องลงแอป ไม่ต้องล็อกอิน ปลอดภัยด้วย P2P Direct Stream by Zentyr',
+    description: 'Send files across devices instantly. No app install, no login. Secure P2P Direct Stream by Zentyr',
     author: {
       '@type': 'Organization',
       name: 'Zentyr',
@@ -81,7 +81,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="th" suppressHydrationWarning className={`${ibmPlexSansThai.variable} ${mitr.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${ibmPlexSansThai.variable} ${mitr.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: initScript }} />
         <script

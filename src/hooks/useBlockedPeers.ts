@@ -55,7 +55,7 @@ export function useBlockedPeers() {
         ...prev,
         {
           id: peer.id,
-          name: peer.name || 'อุปกรณ์ไม่ทราบชื่อ',
+          name: peer.name || 'Unknown device',
           device: peer.device,
           blockedAt: Date.now(),
         }

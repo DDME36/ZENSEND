@@ -220,17 +220,17 @@ export default function Home() {
     const sharedParam = params.get('shared');
 
     if (sharedParam === 'true') {
-      toastRef.current?.show('เลือกอุปกรณ์ปลายทางเพื่อ Zend ไฟล์ได้เลย!', 'success');
+      toastRef.current?.show('Select a device to Zend your file!', 'success');
       // Clean URL params
       window.history.replaceState({}, '', url.toString());
     } else if (modeParam && !initialModeSet && connected) {
       setTimeout(() => {
         if (modeParam === 'wifi') {
           setMode('wifi');
-          toastRef.current?.show('เข้าโหมด WiFi แล้ว', 'info');
+          toastRef.current?.show('Switched to WiFi mode', 'info');
         } else if (modeParam === 'private' && roomParam) {
           setMode('private', roomParam);
-          toastRef.current?.show(`เข้าห้อง ${roomParam} แล้ว`, 'info');
+          toastRef.current?.show(`Joined room ${roomParam}`, 'info');
         }
         setInitialModeSet(true);
       }, 0);
@@ -364,25 +364,25 @@ export default function Home() {
       
       // Show notification
       if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('ข้อความใหม่จาก ' + textMessage.from.name, {
+        new Notification('New message from ' + textMessage.from.name, {
           body: textMessage.text.slice(0, 100) + (textMessage.text.length > 100 ? '...' : ''),
           icon: '/icon-192.png',
           badge: '/icon-192.png',
         });
       }
       
-      toastRef.current?.show(`ได้รับข้อความจาก ${textMessage.from.name}`, 'success', {
-        label: 'อ่านข้อความ',
+      toastRef.current?.show(`Message from ${textMessage.from.name}`, 'success', {
+        label: 'Read',
         onClick: () => setViewingMessage({
           text: textMessage.text,
           from: textMessage.from.name,
-          timestamp: new Date(textMessage.timestamp).toLocaleString('th-TH'),
+          timestamp: new Date(textMessage.timestamp).toLocaleString('en-US'),
         }),
       });
       
       // Add to history with text content
       addToHistory({
-        fileName: 'ข้อความ/ลิงก์',
+        fileName: 'Text / Link',
         fileSize: new Blob([textMessage.text]).size,
         peerName: textMessage.from.name,
         direction: 'received',
@@ -411,49 +411,49 @@ export default function Home() {
           success: true,
           type: transferResult.type,
           textContent: transferResult.textContent,
-          statusText: transferResult.direction === 'sent' ? 'ส่งสำเร็จ' : 'รับไฟล์สำเร็จ',
+          statusText: transferResult.direction === 'sent' ? 'Sent' : 'Received',
         });
         setTimeout(() => {
           setHistory(getHistory());
         }, 0);
       } else {
         // Transfer failed, rejected, blocked, or timed out
-        let statusText = 'ล้มเหลว';
-        let toastMessage = `การส่งไฟล์ "${transferResult.fileName}" ล้มเหลว`;
+        let statusText = 'Failed';
+        let toastMessage = `Transfer of "${transferResult.fileName}" failed`;
         let toastType: 'error' | 'warning' = 'error';
 
         if (transferResult.reason === 'rejected') {
-          statusText = 'ผู้รับปฏิเสธ';
-          toastMessage = `${transferResult.peerName} ปฏิเสธการรับไฟล์ "${transferResult.fileName}"`;
+          statusText = 'Declined';
+          toastMessage = `${transferResult.peerName} declined "${transferResult.fileName}"`;
           toastType = 'warning';
           play('reject');
         } else if (transferResult.reason === 'blocked') {
-          statusText = 'ถูกบล็อก';
-          toastMessage = `${transferResult.peerName} ปฏิเสธและบล็อกการรับไฟล์จากอุปกรณ์นี้`;
+          statusText = 'Blocked';
+          toastMessage = `${transferResult.peerName} declined and blocked transfers from this device`;
           toastType = 'error';
           play('block');
         } else if (transferResult.reason === 'timeout') {
-          statusText = 'หมดเวลา';
-          toastMessage = `ไม่มีการตอบรับคำขอส่งไฟล์จาก ${transferResult.peerName} (หมดเวลา 30 วิ)`;
+          statusText = 'Timed out';
+          toastMessage = `No response from ${transferResult.peerName} (timed out after 30s)`;
           toastType = 'warning';
           play('reject');
         } else if (transferResult.reason === 'cancelled') {
-          statusText = 'ยกเลิกแล้ว';
-          toastMessage = `ยกเลิกการส่งไฟล์ "${transferResult.fileName}" แล้ว`;
+          statusText = 'Cancelled';
+          toastMessage = `Transfer of "${transferResult.fileName}" cancelled`;
           toastType = 'warning';
         } else if (transferResult.reason === 'busy') {
-          statusText = transferResult.direction === 'sent' ? 'กำลังส่งรายการอื่น' : 'ผู้รับไม่ว่าง';
+          statusText = transferResult.direction === 'sent' ? 'Sending other file' : 'Receiver busy';
           toastMessage = transferResult.direction === 'sent'
-            ? 'มีรายการส่งไฟล์อื่นกำลังทำงานอยู่ กรุณารอสักครู่'
-            : `${transferResult.peerName} กำลังรับหรือพิจารณาไฟล์อื่น กรุณาลองใหม่อีกครั้ง`;
+            ? 'Another transfer is in progress, please wait'
+            : `${transferResult.peerName} is busy with another transfer, try again`;
           toastType = 'warning';
         } else if (transferResult.reason === 'rate-limited') {
-          statusText = 'ส่งคำขอถี่เกินไป';
-          toastMessage = 'ส่งคำขอถี่เกินไป กรุณารอสักครู่แล้วลองใหม่';
+          statusText = 'Too many requests';
+          toastMessage = 'Sending too fast — please wait a moment and try again';
           toastType = 'warning';
         } else if (transferResult.reason === 'expired') {
-          statusText = 'คำขอหมดอายุ';
-          toastMessage = `คำขอรับไฟล์ "${transferResult.fileName}" หมดอายุแล้ว`;
+          statusText = 'Expired';
+          toastMessage = `File offer for "${transferResult.fileName}" has expired`;
           toastType = 'warning';
         }
 
@@ -490,7 +490,7 @@ export default function Home() {
     }
 
     // Multiple files - create ZIP (Smart Folder: use preserved paths for folder structure)
-    toastRef.current?.show('กำลังมัดรวมไฟล์...', 'info');
+    toastRef.current?.show('Bundling files...', 'info');
 
     try {
       const zipFile = await createZipFile(filesWithContext);
@@ -501,7 +501,7 @@ export default function Home() {
         sendFile(peer, zipFile);
       } else {
         // ZIP failed (e.g., > 100MB) -> send files one by one (Queue)
-        toastRef.current?.show(`ไฟล์ใหญ่เกิน 100MB จะทยอยส่งทีละไฟล์ (${filesWithContext.length} ไฟล์)`, 'warning');
+        toastRef.current?.show(`Files over 100MB — sending ${filesWithContext.length} files individually`, 'warning');
 
         // Simple queue to prevent freezing
         for (const item of filesWithContext) {
@@ -513,7 +513,7 @@ export default function Home() {
       }
     } catch (err) {
       console.error('ZIP error:', err);
-      toastRef.current?.show('มัดรวมไฟล์ล้มเหลว', 'error');
+      toastRef.current?.show('Failed to bundle files', 'error');
     }
   }, [sendFile]);
 
@@ -551,7 +551,7 @@ export default function Home() {
       const validFiles = filesArr.filter(f => {
         if (!f || f.size === 0) {
           console.warn(`⚠️ Skipping invalid file: ${f?.name || 'unknown'} (size: ${f?.size})`);
-          toastRef.current?.show(`ไฟล์ ${f?.name || 'unknown'} ไม่ถูกต้อง`, 'error');
+          toastRef.current?.show(`Invalid file: ${f?.name || 'unknown'}`, 'error');
           return false;
         }
         console.log(`✅ Valid file: ${f.name} (${f.size} bytes, ${f.type || 'no type'})`);
@@ -560,7 +560,7 @@ export default function Home() {
 
       if (validFiles.length === 0) {
         console.error('❌ No valid files selected');
-        toastRef.current?.show('ไม่มีไฟล์ที่ถูกต้อง', 'error');
+        toastRef.current?.show('No valid files selected', 'error');
         return;
       }
 
@@ -617,13 +617,13 @@ export default function Home() {
   const handleAcceptFile = useCallback(() => {
     // Don't add to history here - wait for transfer to complete
     acceptFile();
-    toastRef.current?.show('กำลังรับไฟล์...', 'info');
+    toastRef.current?.show('Receiving file...', 'info');
   }, [acceptFile]);
 
   const handleRejectFile = useCallback(() => {
     rejectFile('rejected');
     play('reject');
-    toastRef.current?.show('ปฏิเสธการรับไฟล์แล้ว', 'warning');
+    toastRef.current?.show('File declined', 'warning');
   }, [rejectFile, play]);
 
   const handleRejectAndBlock = useCallback((peer: Peer) => {
@@ -640,7 +640,7 @@ export default function Home() {
     blockPeer(pendingBlock.peer);
     blockRemotePeer(pendingBlock.peer.id);
     play('block');
-    toastRef.current?.show(`บล็อก ${pendingBlock.peer.name} แล้ว สามารถเลิกบล็อกได้จากเมนูเพิ่มเติม`, 'error');
+    toastRef.current?.show(`${pendingBlock.peer.name} blocked — manage from the menu`, 'error');
     setPendingBlock(null);
   }, [pendingBlock, rejectFile, blockPeer, blockRemotePeer, play]);
 
@@ -649,7 +649,7 @@ export default function Home() {
     unblockPeer(peerId);
     unblockRemotePeer(peerId);
     play('toggleOn');
-    toastRef.current?.show(`เลิกบล็อก ${peer?.name || 'อุปกรณ์'} แล้ว`, 'success');
+    toastRef.current?.show(`${peer?.name || 'Device'} unblocked`, 'success');
   }, [blockedPeers, unblockPeer, unblockRemotePeer, play]);
 
 
@@ -664,7 +664,7 @@ export default function Home() {
   const handleQRScan = useCallback((code: string) => {
     setMode('private', code);
     setShowScannerModal(false);
-    toastRef.current?.show(`กำลังเข้าร่วมห้อง ${code}...`, 'info');
+    toastRef.current?.show(`Joining room ${code}...`, 'info');
   }, [setMode]);
 
   // Performance Optimization: Pause animations when tab is not visible
@@ -750,7 +750,7 @@ export default function Home() {
         <ZenIntroSplash onStartExit={handleSplashStartExit} onComplete={handleSplashComplete} />
       )}
 
-      <a className="skip-link" href="#transfer-workspace">ข้ามไปพื้นที่ส่งไฟล์</a>
+      <a className="skip-link" href="#transfer-workspace">Skip to transfer area</a>
       <div inert={showSplash} className={`app compact-workspace${splashDone ? ' workspace-revealed' : ' workspace-hidden'}`}>
         <div className="reveal-item reveal-delay-1">
           <Header
@@ -801,7 +801,7 @@ export default function Home() {
           />
         </div>
 
-        <main id="transfer-workspace" tabIndex={-1} className="main-stage-container reveal-item reveal-delay-3" aria-label="พื้นที่ส่งไฟล์">
+        <main id="transfer-workspace" tabIndex={-1} className="main-stage-container reveal-item reveal-delay-3" aria-label="File transfer area">
           {peers.length === 0 ? (
             <EmptyState
               mode={discoveryMode}
@@ -914,10 +914,10 @@ export default function Home() {
 
       <ConfirmModal
         show={!!pendingBlock}
-        title={pendingBlock ? `บล็อก ${pendingBlock.peer.name}?` : 'บล็อกอุปกรณ์?'}
-        message="อุปกรณ์นี้จะส่งไฟล์หรือข้อความหาเครื่องคุณไม่ได้ คุณสามารถเลิกบล็อกภายหลังได้จากเมนูเพิ่มเติม"
-        confirmText="บล็อกอุปกรณ์"
-        cancelText="ยังไม่บล็อก"
+        title={pendingBlock ? `Block ${pendingBlock.peer.name}?` : 'Block device?'}
+        message="This device will no longer be able to send files or messages to you. You can unblock it later from the menu."
+        confirmText="Block"
+        cancelText="Cancel"
         onConfirm={confirmBlockPeer}
         onCancel={() => setPendingBlock(null)}
       />

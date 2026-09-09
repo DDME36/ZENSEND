@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 
 export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zensend.zentyr.com';
-export const siteDescription = 'ส่งไฟล์และข้อความข้ามอุปกรณ์ได้ทันทีผ่านการเชื่อมต่อแบบ P2P ไม่ต้องติดตั้งแอปหรือสมัครสมาชิก';
+export const siteDescription = 'Send files and messages across devices instantly via P2P — no app install, no sign-up required.';
 
 export const siteMetadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: 'ZenSend — ส่งไฟล์ข้ามอุปกรณ์ได้ทันที',
+  title: 'ZenSend — Instant Cross-Device File Transfer',
   description: siteDescription,
   manifest: '/manifest.json',
   alternates: { canonical: '/' },
@@ -19,13 +19,13 @@ export const siteMetadata: Metadata = {
   },
   appleWebApp: { capable: true, statusBarStyle: 'default', title: 'ZenSend' },
   openGraph: {
-    type: 'website', locale: 'th_TH', alternateLocale: 'en_US', url: siteUrl,
-    siteName: 'ZenSend by Zentyr', title: 'ZenSend — ส่งไฟล์ข้ามอุปกรณ์ได้ทันที',
+    type: 'website', locale: 'en_US', url: siteUrl,
+    siteName: 'ZenSend by Zentyr', title: 'ZenSend — Instant Cross-Device File Transfer',
     description: siteDescription,
-    images: [{ url: `${siteUrl}/og-image.png`, width: 1200, height: 630, alt: 'ZenSend — ส่งไฟล์และข้อความโดยตรงระหว่างอุปกรณ์', type: 'image/png' }],
+    images: [{ url: `${siteUrl}/og-image.png`, width: 1200, height: 630, alt: 'ZenSend — Send files and messages directly between devices', type: 'image/png' }],
   },
-  twitter: { card: 'summary_large_image', title: 'ZenSend — ส่งไฟล์ข้ามอุปกรณ์ได้ทันที', description: siteDescription, images: [`${siteUrl}/og-image.png`] },
-  keywords: ['ZenSend', 'Zentyr', 'file transfer', 'P2P', 'WebRTC', 'ส่งไฟล์', 'แชร์ไฟล์', 'direct transfer'],
+  twitter: { card: 'summary_large_image', title: 'ZenSend — Instant Cross-Device File Transfer', description: siteDescription, images: [`${siteUrl}/og-image.png`] },
+  keywords: ['ZenSend', 'Zentyr', 'file transfer', 'P2P', 'WebRTC', 'share files', 'direct transfer', 'no upload', 'peer to peer'],
   authors: [{ name: 'Zentyr' }], creator: 'Zentyr', publisher: 'Zentyr',
   robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
 };
