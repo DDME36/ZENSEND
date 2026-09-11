@@ -69,6 +69,11 @@ interface PublicPeer extends Peer {
       return;
     }
     
+    // Fallback: Rewrite non-prefixed static asset requests to /zensend subpath
+    if (req.url && !req.url.startsWith('/zensend') && !req.url.startsWith('/socket.io')) {
+      req.url = `/zensend${req.url}`;
+    }
+
     if (handler) handler(req, res);
     else { res.writeHead(404); res.end(); }
   });

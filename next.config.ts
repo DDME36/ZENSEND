@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   basePath: '/zensend',
   assetPrefix: '/zensend',
+  images: {
+    unoptimized: true,
+  },
   compress: true,
   poweredByHeader: false,
   async headers() {

@@ -56,7 +56,7 @@ export function Header({ muted, isDark, hasPeers, isInstallable, isEcoMode, onTo
         >
           <div className="brand-horse-wrapper">
             <div className="brand-horse-aura" aria-hidden="true" />
-            <Image className="brand-horse" src="/zensend-z-horse.png" alt="ZenSend" width={48} height={48} priority />
+            <Image className="brand-horse" src="/zensend-z-horse.png" alt="ZenSend" width={48} height={48} priority unoptimized />
           </div>
           <div className="logo-brand-col">
             <div className="logo-text-row">

@@ -147,6 +147,7 @@ export function ZenIntroSplash({ onComplete, onStartExit, autoAdvanceDelay = 270
               width={82}
               height={82}
               priority
+              unoptimized
             />
           </div>
         </div>
