@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  basePath: '/zensend',
+  assetPrefix: '/zensend',
   compress: true,
   poweredByHeader: false,
   async headers() {

@@ -15,7 +15,8 @@ export const RTC_CONFIG: RTCConfiguration = {
 
 export async function loadIceServers(): Promise<RTCIceServer[]> {
   try {
-    const res = await fetch('/api/ice-servers');
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '/zensend';
+    const res = await fetch(`${basePath}/api/ice-servers`);
     const data = await res.json();
     console.log('✅ ICE servers loaded from API');
     return data.iceServers;

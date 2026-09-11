@@ -291,7 +291,9 @@ export default function Home() {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       // Small delay to prevent blocking main thread on load
       setTimeout(() => {
-        navigator.serviceWorker.register('/sw.js').catch(console.error);
+        const swUrl = `${process.env.NEXT_PUBLIC_BASE_PATH ?? '/zensend'}/sw.js`;
+        const swScope = `${process.env.NEXT_PUBLIC_BASE_PATH ?? '/zensend'}/`;
+        navigator.serviceWorker.register(swUrl, { scope: swScope }).catch(console.error);
       }, 1000);
     }
   }, []);

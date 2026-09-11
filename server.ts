@@ -53,8 +53,9 @@ interface PublicPeer extends Peer {
   console.log('✅ Next.js prepared, creating HTTP server...');
   
   const httpServer = createServer((req, res) => {
-    // Health check endpoint for Render
-    if (req.url === '/health' || req.url === '/api/health') {
+    // Health check endpoint
+    const urlPath = req.url?.split('?')[0] || '';
+    if (urlPath === '/health' || urlPath === '/api/health' || urlPath === '/zensend/health' || urlPath === '/zensend/api/health') {
       const health = {
         status: 'ok',
         uptime: process.uptime(),
@@ -77,7 +78,10 @@ interface PublicPeer extends Peer {
     ? originsEnv.split(',').map(s => s.trim())
     : true;
 
+  const socketPath = process.env.SOCKET_PATH || '/zensend/socket.io';
+
   const io = new Server(httpServer, {
+    path: socketPath,
     cors: {
       origin: allowedOrigins,
       methods: ['GET', 'POST'],

@@ -9,8 +9,8 @@ module.exports = {
       max_memory_restart: '1G',
       env: {
         NODE_ENV: 'production',
-        PORT: 3001,
-        ALLOWED_ORIGINS: 'https://zensend.vercel.app,http://localhost:3000',
+        PORT: 3002,
+        ALLOWED_ORIGINS: 'https://zentyr.online,http://localhost:3000',
         ENABLE_RENDER_KEEPALIVE: 'false',
       },
     },

@@ -1,12 +1,13 @@
-const CACHE_NAME = 'zensend-z-horse-v8';
+const CACHE_NAME = 'zensend-z-horse-v9';
+const BASE_PATH = self.registration.scope ? new URL(self.registration.scope).pathname.replace(/\/$/, '') : '';
 const STATIC_ASSETS = [
-  '/',
-  '/manifest.json',
-  '/icon.svg',
-  '/favicon.ico',
-  '/favicon-32.png?v=z-riders-1',
-  '/icon-192.png?v=z-horse-1',
-  '/icon-512.png?v=z-horse-1',
+  `${BASE_PATH}/`,
+  `${BASE_PATH}/manifest.json`,
+  `${BASE_PATH}/icon.svg`,
+  `${BASE_PATH}/favicon.ico`,
+  `${BASE_PATH}/favicon-32.png?v=z-riders-1`,
+  `${BASE_PATH}/icon-192.png?v=z-horse-1`,
+  `${BASE_PATH}/icon-512.png?v=z-horse-1`,
 ];
 
 // Install - cache static assets
@@ -34,16 +35,14 @@ self.addEventListener('activate', (event) => {
 // Fetch - Stale-while-revalidate for static, Network-first for navigation
 self.addEventListener('fetch', (event) => {
   // Handle POST requests for Share Target
-  if (event.request.method === 'POST' && new URL(event.request.url).pathname === '/') {
+  const requestPath = new URL(event.request.url).pathname;
+  if (event.request.method === 'POST' && (requestPath === '/' || requestPath === `${BASE_PATH}/` || requestPath === BASE_PATH)) {
     event.respondWith(
       (async () => {
         try {
-          // In a real robust PWA, we'd store files in IndexedDB here
-          // and let the frontend read them on load.
-          // For now, we redirect to home. The user will have to manually pick files.
-          return Response.redirect('/?shared=true', 303);
+          return Response.redirect(`${BASE_PATH}/?shared=true`, 303);
         } catch {
-          return Response.redirect('/', 303);
+          return Response.redirect(`${BASE_PATH}/`, 303);
         }
       })()
     );
@@ -72,7 +71,7 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.includes('/_next/webpack-hmr') || url.pathname.includes('/__nextjs')) return;
 
   // Skip socket.io and API requests (always network)
-  if (url.pathname.includes('/socket.io/') || url.pathname.startsWith('/api/')) return;
+  if (url.pathname.includes('/socket.io/') || url.pathname.includes('/api/')) return;
 
   // Skip StreamSaver service worker and download URLs
   if (url.hostname.includes('jimmywarting.github.io')) return;
@@ -90,7 +89,7 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(() => {
           // Offline fallback
-          return caches.match('/') || caches.match('/offline.html');
+          return caches.match(`${BASE_PATH}/`) || caches.match('/') || caches.match(`${BASE_PATH}/offline.html`);
         })
     );
     return;
@@ -138,7 +137,7 @@ self.addEventListener('notificationclick', (event) => {
       }
       // Open new window if no existing window
       if (clients.openWindow) {
-        return clients.openWindow('/');
+        return clients.openWindow(`${BASE_PATH}/`);
       }
     })
   );

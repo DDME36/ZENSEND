@@ -1439,7 +1439,8 @@ export function usePeerConnection() {
     }
 
     // Fetch ICE servers from API
-    fetch('/api/ice-servers')
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '/zensend';
+    fetch(`${basePath}/api/ice-servers`)
       .then(res => res.json())
       .then(data => {
         if (data?.iceServers && data.iceServers.length > 0) {
@@ -1498,7 +1499,9 @@ export function usePeerConnection() {
     setMyPeer(peer);
 
     const signalingUrl = process.env.NEXT_PUBLIC_SIGNALING_URL || undefined;
+    const socketPath = process.env.NEXT_PUBLIC_SOCKET_PATH ?? '/zensend/socket.io';
     const socket = io(signalingUrl, {
+      path: socketPath,
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 10,

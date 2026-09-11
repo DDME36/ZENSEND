@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zensend.zentyr.com';
+export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://zentyr.online/zensend';
 export const siteDescription = 'Send files and messages across devices instantly via P2P — no app install, no sign-up required.';
 
 export const siteMetadata: Metadata = {
