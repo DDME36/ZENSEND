@@ -11,8 +11,9 @@ const port = parseInt(process.env.PORT || '3000', 10);
 
 console.log(`🔧 Starting server in ${dev ? 'development' : 'production'} mode on port ${port}...`);
 
-// Test mode runs the real signaling handlers without starting Next.js.
-const app = process.env.NODE_ENV === 'test' ? null : next({ dev, hostname, port });
+// Test mode or Standalone signaling runs the real signaling handlers without starting Next.js.
+const isStandalone = process.env.STANDALONE_SIGNALING === 'true';
+const app = process.env.NODE_ENV === 'test' || isStandalone ? null : next({ dev, hostname, port });
 const handler = app?.getRequestHandler();
 
 interface Peer {
@@ -71,9 +72,10 @@ interface PublicPeer extends Peer {
     else { res.writeHead(404); res.end(); }
   });
   
-  const allowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
-    : '*';
+  const originsEnv = process.env.ALLOWED_ORIGINS;
+  const allowedOrigins = originsEnv && originsEnv !== '*'
+    ? originsEnv.split(',').map(s => s.trim())
+    : true;
 
   const io = new Server(httpServer, {
     cors: {
