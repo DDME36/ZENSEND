@@ -9,7 +9,6 @@ export { HistoryModal } from './HistoryModal';
 export { TextShareModal } from './TextShareModal';
 export { ConfirmModal } from './ConfirmModal';
 export { BlockedPeersModal } from './BlockedPeersModal';
-export { FeedbackModal } from './FeedbackModal';
 export { TextViewModal } from './TextViewModal';
 export { ErrorModal } from './ErrorModal';
 export { IOSDownloadModal } from './IOSDownloadModal';
