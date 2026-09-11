@@ -7,15 +7,15 @@ export const siteMetadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: 'ZenSend — Instant Cross-Device File Transfer',
   description: siteDescription,
-  manifest: '/manifest.json',
+  manifest: '/zensend/manifest.json',
   alternates: { canonical: '/' },
   icons: {
     icon: [
-      { url: '/favicon-32.png?v=zen-mark-1', type: 'image/png', sizes: '32x32' },
-      { url: '/favicon-16.png?v=zen-mark-1', type: 'image/png', sizes: '16x16' },
-      { url: '/favicon.ico?v=zen-mark-1' },
+      { url: '/zensend/favicon-32.png?v=zen-mark-1', type: 'image/png', sizes: '32x32' },
+      { url: '/zensend/favicon-16.png?v=zen-mark-1', type: 'image/png', sizes: '16x16' },
+      { url: '/zensend/favicon.ico?v=zen-mark-1' },
     ],
-    apple: '/apple-icon.png?v=zen-mark-1',
+    apple: '/zensend/apple-icon.png?v=zen-mark-1',
   },
   appleWebApp: { capable: true, statusBarStyle: 'default', title: 'ZenSend' },
   openGraph: {

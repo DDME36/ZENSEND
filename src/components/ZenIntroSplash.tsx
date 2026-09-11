@@ -142,7 +142,7 @@ export function ZenIntroSplash({ onComplete, onStartExit, autoAdvanceDelay = 270
           <div className="zen-intro-horse-container">
             <Image
               className="zen-intro-horse"
-              src="/zensend-z-horse.png"
+              src="/zensend/zensend-z-horse.png"
               alt="ZenSend Pegasus"
               width={82}
               height={82}

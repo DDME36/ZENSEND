@@ -11,12 +11,13 @@ export default function NotFound() {
         <div className="zen-not-found-icon-wrap">
           <div className="zen-not-found-glow" aria-hidden="true" />
           <Image
-            src="/zensend-z-horse.png"
+            src="/zensend/zensend-z-horse.png"
             alt="ZenSend Pegasus"
             width={72}
             height={72}
             className="zen-not-found-horse"
             priority
+            unoptimized
           />
         </div>
 

@@ -28,12 +28,13 @@ export default function GlobalError({
             <div className="zen-error-icon-wrap">
               <div className="zen-error-glow" aria-hidden="true" />
               <Image
-                src="/zensend-z-horse.png"
+                src="/zensend/zensend-z-horse.png"
                 alt="ZenSend Pegasus"
                 width={72}
                 height={72}
                 className="zen-error-horse"
                 priority
+                unoptimized
               />
             </div>
 

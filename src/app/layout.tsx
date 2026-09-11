@@ -88,7 +88,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <link rel="apple-touch-icon" href="/apple-icon.png?v=z-horse-1" />
+        <link rel="apple-touch-icon" href="/zensend/apple-icon.png?v=z-horse-1" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
       </head>
       <body><ErrorBoundary>{children}</ErrorBoundary></body>

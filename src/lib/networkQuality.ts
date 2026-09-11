@@ -49,7 +49,8 @@ export async function detectNetworkQuality(): Promise<NetworkQuality> {
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const timeoutId = controller ? setTimeout(() => controller.abort(), 3000) : null;
 
-    const response = await fetch('/health', { 
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '/zensend';
+    const response = await fetch(`${basePath}/health`, { 
       method: 'GET',
       cache: 'no-store',
       signal: controller?.signal,

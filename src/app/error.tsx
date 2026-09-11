@@ -22,12 +22,13 @@ export default function Error({
         <div className="zen-error-icon-wrap">
           <div className="zen-error-glow" aria-hidden="true" />
           <Image
-            src="/zensend-z-horse.png"
+            src="/zensend/zensend-z-horse.png"
             alt="ZenSend"
             width={68}
             height={68}
             className="zen-error-horse"
             priority
+            unoptimized
           />
         </div>
 
