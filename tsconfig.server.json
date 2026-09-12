@@ -8,8 +8,9 @@
     "noEmit": false,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "incremental": false
   },
-  "include": ["server.ts"],
+  "include": ["server.ts", "signaling-policy.ts", "abuse-policy.ts"],
   "exclude": ["node_modules"]
 }
