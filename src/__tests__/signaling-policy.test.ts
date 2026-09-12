@@ -8,7 +8,7 @@ import {
   isOfferExpired,
   validPacket,
   type TransferTicket,
-} from './signaling-policy';
+} from '../../signaling-policy';
 
 const ticket = (overrides: Partial<TransferTicket> = {}): TransferTicket => ({
   from: 'sender-socket',

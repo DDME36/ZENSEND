@@ -21,6 +21,12 @@
 /build
 /dist
 server.js
+abuse-policy.js
+signaling-policy.js
+
+# tools & caches
+.superpowers/
+.codex*
 
 # misc
 .DS_Store

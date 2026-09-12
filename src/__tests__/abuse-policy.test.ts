@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { SlidingWindowLimiter, blockKey, isBlocked } from './abuse-policy';
+import { SlidingWindowLimiter, blockKey, isBlocked } from '../../abuse-policy';
 
 test('blocks the same peer pair after the configured burst and reports retry time', () => {
   const limiter = new SlidingWindowLimiter(3, 60_000);
@@ -19,4 +19,3 @@ test('uses directional block relationships', () => {
   assert.equal(isBlocked(blocked, 'receiver-peer', 'sender-peer'), true);
   assert.equal(isBlocked(blocked, 'sender-peer', 'receiver-peer'), false);
 });
-
