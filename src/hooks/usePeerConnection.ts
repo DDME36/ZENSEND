@@ -1432,7 +1432,7 @@ export function usePeerConnection() {
     const connectionRoutes = connectionRoutesRef.current;
 
     // Don't connect if in In-App Browser
-    if (typeof window !== 'undefined' && (sessionStorage.getItem('zensend_inapp') === 'true' || sessionStorage.getItem('purrdrop_inapp') === 'true')) {
+    if (typeof window !== 'undefined' && sessionStorage.getItem('zensend_inapp') === 'true') {
       console.log('🚫 In-App Browser detected, not connecting');
       setConnectionStatus('disconnected');
       return;
@@ -1459,7 +1459,7 @@ export function usePeerConnection() {
       localStorage.setItem('zensend_session_id', sessionId);
     }
 
-    let tabId = sessionStorage.getItem('zensend_tab_id') || sessionStorage.getItem('purrdrop_tab_id');
+    let tabId = sessionStorage.getItem('zensend_tab_id');
     if (!tabId) {
       tabId = uuidv4().slice(0, 8);
       sessionStorage.setItem('zensend_tab_id', tabId);

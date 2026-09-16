@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-import { ZenBeacon } from './ZenBeacon';
+import { ZenBeacon } from '@/components/ZenBeacon';
 
 test('renders the scanning beacon as an accessible transparent SVG', () => {
   const markup = renderToStaticMarkup(

@@ -1,8 +1,13 @@
 import type { NextConfig } from "next";
 
+const basePathEnv = process.env.NEXT_PUBLIC_BASE_PATH;
+const basePath = basePathEnv !== undefined
+  ? (basePathEnv === '' || basePathEnv === '/' ? undefined : basePathEnv)
+  : '/zensend';
+
 const nextConfig: NextConfig = {
-  basePath: '/zensend',
-  assetPrefix: '/zensend',
+  basePath,
+  assetPrefix: basePath,
   images: {
     unoptimized: true,
   },

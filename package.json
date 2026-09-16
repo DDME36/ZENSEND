@@ -8,7 +8,7 @@
     "build:server": "tsc -p tsconfig.server.json",
     "build:client": "next build",
     "brand:build": "tsx scripts/build-brand.tsx",
-    "test": "tsx --test src/__tests__/*.test.ts",
+    "test": "tsx --test src/__tests__/*.test.ts src/__tests__/*.test.tsx",
     "test:ui-contracts": "tsx --test src/__tests__/production-ui-contracts.test.ts",
     "start": "node server.js",
     "lint": "eslint"

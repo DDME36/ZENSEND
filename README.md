@@ -120,14 +120,21 @@
    - Port `3478, 5349` (TCP/UDP) สำหรับ STUN/TURN
    - Port `49152-65535` (UDP) สำหรับ TURN Relay Media Ports
    - Port `3001` (TCP) สำหรับ Signaling Server
-5. **รัน Signaling Server ด้วย PM2**:
-   ```bash
-   npm install -g pm2
-   bun install
-   pm2 start deploy/ecosystem.config.js
-   pm2 save
-   pm2 startup
-   ```
+5. **รัน Signaling Server ด้วย PM2 หรือ Deployment Script**:
+   - **วิธีที่ 1: ใช้สคริปต์อัตโนมัติ (แนะนำ)**:
+     ```bash
+     chmod +x deploy/deploy.sh
+     ./deploy/deploy.sh
+     ```
+   - **วิธีที่ 2: ดำเนินการด้วยตนเอง**:
+     ```bash
+     npm install -g pm2
+     bun install
+     bun run build    # สำคัญ: ต้อง build ก่อนเพื่อให้ได้ server.js และ Next.js bundle
+     pm2 start deploy/ecosystem.config.js
+     pm2 save
+     pm2 startup
+     ```
 
 ---
 
@@ -136,6 +143,7 @@
 ```
 ZenSend/
 ├── deploy/                      # ไฟล์และสคริปต์สำหรับ Production
+│   ├── deploy.sh                # สคริปต์ Build & Deploy อัตโนมัติ
 │   ├── coturn-setup.sh          # สคริปต์ติดตั้ง Coturn STUN/TURN อัตโนมัติ
 │   ├── ecosystem.config.js      # คอนฟิก PM2 สำหรับรัน Signaling Server
 │   └── signaling.service        # คอนฟิก Systemd Service สำหรับ Ubuntu

@@ -40,7 +40,7 @@ export default function RootLayout({
   const initScript = `
     (function() {
       try {
-        var theme = localStorage.getItem('zensend_theme') || localStorage.getItem('purrdrop_theme');
+        var theme = localStorage.getItem('zensend_theme');
         var resolved = theme;
         if (!theme || theme === 'system') {
           resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';

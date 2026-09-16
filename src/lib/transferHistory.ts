@@ -13,13 +13,12 @@ export interface TransferRecord {
 }
 
 const STORAGE_KEY = 'zensend_history';
-const LEGACY_STORAGE_KEY = 'purrdrop_history';
 const MAX_RECORDS = 50;
 
 export function getHistory(): TransferRecord[] {
   if (typeof window === 'undefined') return [];
   try {
-    const data = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
+    const data = localStorage.getItem(STORAGE_KEY);
     return data ? JSON.parse(data) : [];
   } catch {
     return [];

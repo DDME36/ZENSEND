@@ -57,7 +57,7 @@ export function ScannerModal({ show, onScan, onClose }: ScannerModalProps) {
   }, []);
 
   const handleScanSuccess = useCallback((text: string) => {
-    // Expected format: https://purrdrop.com/?mode=private&room=ABCDE
+    // Expected format: https://zensend.zentyr.com/zensend/?mode=private&room=12345
     try {
       const url = new URL(text);
       const room = url.searchParams.get('room');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface BlockedPeer {
   id: string;
@@ -10,12 +10,9 @@ export interface BlockedPeer {
 }
 
 const STORAGE_KEY = 'zensend_blocked_peers';
-const STRIKE_WINDOW_MS = 60 * 1000; // 60 seconds
-const MAX_STRIKES_BEFORE_ALERT = 3;
 
 export function useBlockedPeers() {
   const [blockedPeers, setBlockedPeers] = useState<BlockedPeer[]>([]);
-  const rejectStrikesRef = useRef<Map<string, number[]>>(new Map());
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -74,7 +71,7 @@ export function useBlockedPeers() {
   }, [persistBlockedPeers]);
 
   // Deprecated auto-block: only manual block is permitted now
-  const recordRejection = useCallback((_peerId: string): { isSpamming: boolean; strikeCount: number } => {
+  const recordRejection = useCallback((): { isSpamming: boolean; strikeCount: number } => {
     return {
       isSpamming: false,
       strikeCount: 0,

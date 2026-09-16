@@ -11,7 +11,7 @@ export function useTheme() {
   // Initialize theme from DOM attribute or localStorage immediately on mount
   useEffect(() => {
     const currentDomTheme = document.documentElement.getAttribute('data-theme') as 'light' | 'dark' | null;
-    const saved = (localStorage.getItem('zensend_theme') || localStorage.getItem('purrdrop_theme')) as Theme | null;
+    const saved = localStorage.getItem('zensend_theme') as Theme | null;
     
     if (saved || currentDomTheme) {
       setTimeout(() => {

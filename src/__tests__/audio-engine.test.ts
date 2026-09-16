@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createCooldownGate } from './engine';
-import { zenPulseCues } from './palettes';
+import { createCooldownGate } from '@/lib/audio/engine';
+import { zenPulseCues } from '@/lib/audio/palettes';
 
 test('prevents the same cue from stacking inside its cooldown', () => {
   const gate = createCooldownGate();

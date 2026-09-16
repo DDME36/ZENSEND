@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { matchesTransfer, shouldReportProgress } from './transferLifecycle';
+import { matchesTransfer, shouldReportProgress } from '@/lib/transferLifecycle';
 
 test('terminal events only affect their matching transfer', () => {
   assert.equal(matchesTransfer('file-a', 'file-a'), true);
