@@ -27,6 +27,7 @@ signaling-policy.js
 # tools & caches
 .superpowers/
 .codex*
+.agents/
 
 # misc
 .DS_Store

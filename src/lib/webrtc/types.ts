@@ -43,6 +43,7 @@ export interface ReceivingFile {
   useStreaming: boolean;
   received: number;
   senderId?: string;
+  isRelay?: boolean;
   _lastChunkTime?: number;
   _writeQueue?: Promise<void>;
   _writeFailed?: boolean;
@@ -60,4 +61,4 @@ export interface ReceivingText {
 
 export const MAX_RETRIES = 1;
 export const RETRY_DELAY = 800;
-export const CONNECTION_TIMEOUT = 5000;
+export const CONNECTION_TIMEOUT = 15000;

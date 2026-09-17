@@ -153,7 +153,7 @@ export function usePeerConnection() {
   const completionResolversRef = useRef<Map<string, { resolve: () => void; reject: (err: Error) => void }>>(new Map());
   const peerRemovalTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const fileOfferRef = useRef<FileOffer | null>(null);
-  const activeTransferRef = useRef<{ fileId: string; peerId: string } | null>(null);
+  const activeTransferRef = useRef<{ fileId: string; peerId: string; mode?: 'p2p' | 'relay' } | null>(null);
   const cancelledFileIdsRef = useRef<Set<string>>(new Set());
   const relayReadyRejectorsRef = useRef<Map<string, (error: Error) => void>>(new Map());
   const cancelTransferRef = useRef<() => void>(() => {});
@@ -319,10 +319,11 @@ export function usePeerConnection() {
               useStreaming: Boolean(streamWriter),
               received: 0,
               senderId: peerId,
+              isRelay: false,
               _lastReportedBytes: 0,
               _lastReportedAt: Date.now(),
             });
-            activeTransferRef.current = { fileId: msg.fileId, peerId };
+            activeTransferRef.current = { fileId: msg.fileId, peerId, mode: 'p2p' };
 
             // Request wake lock when receiving
             if ('wakeLock' in navigator) {
@@ -815,6 +816,7 @@ export function usePeerConnection() {
       status: 'connecting', // เริ่มต้นด้วย connecting
       connectionType: 'relay',
     });
+    activeTransferRef.current = { fileId, peerId, mode: 'relay' };
 
     try {
       if (!socketRef.current) {
@@ -1029,6 +1031,7 @@ export function usePeerConnection() {
       progress: 0,
       status: 'connecting', // เริ่มต้นด้วย connecting
     });
+    activeTransferRef.current = { fileId, peerId, mode: 'p2p' };
 
     try {
       // Create connection and data channel
@@ -1527,19 +1530,37 @@ export function usePeerConnection() {
       console.log('🔌 Socket disconnected');
       setConnected(false);
       setConnectionStatus('disconnected');
-      if (activeTransferRef.current || fileOfferRef.current) cancelTransferRef.current();
+
+      // Decouple WebRTC P2P transfers from signaling socket disconnect:
+      // If we are actively transferring via direct WebRTC DataChannel, don't abort!
+      const isRelayActive = activeTransferRef.current?.mode === 'relay';
+      const activePeerId = activeTransferRef.current?.peerId;
+      const isP2POpen = Boolean(activePeerId && dataChannelsRef.current.get(activePeerId)?.readyState === 'open');
+
+      if (fileOfferRef.current) {
+        // Pending negotiation requires signaling - cancel pending offer
+        cancelTransferRef.current();
+      } else if (isRelayActive || (!isP2POpen && activeTransferRef.current)) {
+        // Only cancel sending if it is using server relay or P2P is not connected
+        cancelTransferRef.current();
+      }
       
-      // Clean up any active receiving transfers
-      receivingFilesRef.current.forEach((receiving) => {
-        console.log(`🧹 Aborting receive for ${receiving.info.name} due to disconnect`);
-        if (receiving.streamWriter) {
-          receiving.streamWriter.abort();
+      // Clean up receiving transfers that rely on server relay
+      const abortedRelayIds: string[] = [];
+      receivingFilesRef.current.forEach((receiving, fileId) => {
+        if (receiving.isRelay) {
+          console.log(`🧹 Aborting relay receive for ${receiving.info.name} due to socket disconnect`);
+          if (receiving.streamWriter) {
+            receiving.streamWriter.abort();
+          }
+          abortedRelayIds.push(fileId);
         }
       });
-      if (receivingFilesRef.current.size > 0) {
-        receivingFilesRef.current.clear();
+
+      if (abortedRelayIds.length > 0) {
+        abortedRelayIds.forEach(id => receivingFilesRef.current.delete(id));
         setTransfer(prev => {
-          if (prev && (prev.status === 'receiving' || prev.status === 'sending')) {
+          if (prev && prev.status === 'receiving') {
             return { ...prev, status: 'error' };
           }
           return prev;
@@ -1940,10 +1961,11 @@ export function usePeerConnection() {
         useStreaming: Boolean(streamWriter),
         received: 0,
         senderId: data.from,
+        isRelay: true,
         _lastReportedBytes: 0,
         _lastReportedAt: Date.now(),
       });
-      activeTransferRef.current = { fileId: data.fileId, peerId: data.from };
+      activeTransferRef.current = { fileId: data.fileId, peerId: data.from, mode: 'relay' };
 
       if ('wakeLock' in navigator) {
         navigator.wakeLock.request('screen').then(lock => {

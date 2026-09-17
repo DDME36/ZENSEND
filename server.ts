@@ -290,7 +290,20 @@ interface PublicPeer extends Peer {
       if (event === 'join') {
         if (peers.has(socket.id)) return reject('เชื่อมต่อแล้ว กรุณาใช้การเปลี่ยนโหมด');
         if (peers.size >= MAX_PEERS) return reject('เซิร์ฟเวอร์เต็ม กรุณาลองอีกครั้ง');
-        if (Array.from(peers.values()).some(p => p.id === data.peer.id)) return reject('อุปกรณ์นี้เชื่อมต่ออยู่แล้ว กรุณาปิดแท็บเดิมก่อน');
+        const existingSocketId = findSocketIdByPeerId(data.peer.id);
+        if (existingSocketId && existingSocketId !== socket.id) {
+          console.log(`🔄 Peer ${data.peer.name} (${data.peer.id}) reconnecting with new socket, purging stale socket ${existingSocketId}`);
+          const oldSocket = io.sockets.sockets.get(existingSocketId);
+          if (oldSocket) {
+            oldSocket.emit('force-disconnect', { reason: 'มีแท็บหรือการเชื่อมต่อใหม่เข้ามาแทนที่' });
+            oldSocket.disconnect(true);
+          }
+          peers.delete(existingSocketId);
+          for (const [code, members] of rooms.entries()) {
+            members.delete(existingSocketId);
+            if (members.size === 0) rooms.delete(code);
+          }
+        }
       } else if (!peers.has(socket.id)) return reject('กรุณาเชื่อมต่อก่อน');
       if ((event === 'join' || event === 'set-mode') && data.mode === 'private' && data.roomCode) {
         const member = Array.from(rooms.get(data.roomCode) ?? []).map(id => peers.get(id)).find(Boolean);
@@ -512,7 +525,9 @@ interface PublicPeer extends Peer {
       // If sender has a known LAN IP (e.g. 192.168.x.x, 10.x.x.x), also emit an unmasked candidate with the real LAN IP!
       if (candidate && candidate.candidate && candidate.candidate.includes('.local') && senderPeer?.ip) {
         const cleanIp = senderPeer.ip.replace(/^.*:/, '');
-        if (/^\d+\.\d+\.\d+\.\d+$/.test(cleanIp) && !cleanIp.startsWith('127.')) {
+        const isPrivateLAN = cleanIp.startsWith('10.') || cleanIp.startsWith('192.168.') || 
+          (cleanIp.startsWith('172.') && parseInt(cleanIp.split('.')[1] || '0', 10) >= 16 && parseInt(cleanIp.split('.')[1] || '0', 10) <= 31);
+        if (isPrivateLAN) {
           const unmaskedCandidateStr = candidate.candidate.replace(/[a-zA-Z0-9-]+\.local/i, cleanIp);
           console.log(`🧊 Unmasking mDNS candidate for ${senderPeer.name} with LAN IP: ${cleanIp}`);
           io.to(targetSocketId).emit('rtc-ice', {
