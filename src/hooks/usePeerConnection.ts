@@ -181,7 +181,7 @@ export function usePeerConnection() {
       const mimeType = resolveMimeType(fileName, suppliedMimeType);
 
       const blob = chunksOrBlob instanceof Blob
-        ? new Blob([chunksOrBlob], { type: mimeType })
+        ? (chunksOrBlob.type === mimeType ? chunksOrBlob : new Blob([chunksOrBlob], { type: mimeType }))
         : new Blob(chunksOrBlob, { type: mimeType });
 
       if (blob.size !== expectedSize) {

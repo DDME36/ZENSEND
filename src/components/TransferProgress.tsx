@@ -130,12 +130,12 @@ export function TransferProgress({ fileName, fileSize, progress, status, emoji, 
 
   const statusConfig = {
     pending: { text: 'ส่งคำขอแล้ว', icon: 'waiting', color: 'var(--accent-lavender)', detail: `กำลังรอผู้รับกดรับไฟล์` },
-    preparing: { text: 'กำลังเตรียมไฟล์', icon: 'waiting', color: 'var(--accent-lavender)', detail: 'กำลังเตรียมพื้นที่บันทึกก่อนเริ่มส่ง' },
+    preparing: { text: 'กำลังเตรียมการ', icon: 'waiting', color: 'var(--accent-lavender)', detail: 'กำลังเตรียมพื้นที่บันทึกก่อนเริ่มส่ง' },
     connecting: { text: 'กำลังเชื่อมต่อ', icon: 'waiting', color: 'var(--accent-lavender)', detail: 'กำลังสร้างช่องทางส่งไฟล์โดยตรง' },
     sending: { text: 'กำลังส่งไฟล์', icon: 'upload', color: 'var(--accent-mint)', detail: 'อย่าปิดหน้านี้จนกว่าจะส่งเสร็จ' },
     confirming: { text: 'ส่งครบแล้ว', icon: 'waiting', color: 'var(--accent-lavender)', detail: 'กำลังรอผู้รับตรวจสอบไฟล์' },
     receiving: { text: 'กำลังรับไฟล์', icon: 'download', color: 'var(--accent-peach)', detail: 'อย่าปิดหน้าจอระหว่างรับไฟล์' },
-    saving: { text: 'กำลังเตรียมไฟล์', icon: 'save', color: 'var(--accent-lavender)', detail: 'ได้รับข้อมูลครบแล้ว กำลังรวมไฟล์' },
+    saving: { text: 'กำลังรวบรวมไฟล์', icon: 'save', color: 'var(--accent-lavender)', detail: 'ได้รับข้อมูลครบแล้ว กำลังจัดเตรียมไฟล์' },
     complete: { text: 'เสร็จเรียบร้อย', icon: 'check', color: 'var(--accent-mint)', detail: 'ไฟล์พร้อมใช้งานแล้ว' },
     error: { text: 'ผิดพลาด', icon: 'x', color: '#ff6b6b', detail: 'การเชื่อมต่อล้มเหลว' },
   };
@@ -173,7 +173,7 @@ export function TransferProgress({ fileName, fileSize, progress, status, emoji, 
     );
   } else if (config.icon === 'save') {
     iconSvg = (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={config.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon-waiting">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={config.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
         <polyline points="17 21 17 13 7 13 7 21" />
         <polyline points="7 3 7 8 15 8" />

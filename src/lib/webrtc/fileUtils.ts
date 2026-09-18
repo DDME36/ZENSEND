@@ -86,7 +86,7 @@ export async function downloadBlob(
 ): Promise<void> {
   const filename = sanitizeFilename(rawFilename);
   const mimeType = resolveMimeType(filename, rawBlob.type);
-  const blob = new Blob([rawBlob], { type: mimeType });
+  const blob = rawBlob.type === mimeType ? rawBlob : new Blob([rawBlob], { type: mimeType });
   const mobile = isMobileDevice();
 
   if (mobile) {
